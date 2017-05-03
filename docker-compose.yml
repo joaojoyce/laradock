@@ -42,8 +42,8 @@ services:
         - applications
       extra_hosts:
         - "dockerhost:${DOCKER_HOST_IP}"
-      ports:
-        - "${WORKSPACE_SSH_PORT}:22"
+      expose:
+        - "22"
       tty: true
       networks:
         - frontend
@@ -111,8 +111,7 @@ services:
         - ${NGINX_HOST_LOG_PATH}:/var/log/nginx
         - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
       ports:
-        - "${NGINX_HOST_HTTP_PORT}:80"
-        - "${NGINX_HOST_HTTPS_PORT}:443"
+        - "${HTTP_PORT}:80"
       depends_on:
         - php-fpm
       networks:
@@ -144,8 +143,7 @@ services:
         - ${APACHE_HOST_LOG_PATH}:/var/log/apache2
         - ./apache2/sites:/etc/apache2/sites-available
       ports:
-        - "${APACHE_HOST_HTTP_PORT}:80"
-        - "${APACHE_HOST_HTTPS_PORT}:443"
+        - "${HTTP_PORT}:80"
       depends_on:
         - php-fpm
       networks:
@@ -172,8 +170,8 @@ services:
       build: ./minio
       volumes:
         - minio:/export
-      ports:
-        - "${MINIO_PORT}:9000"
+      expose:
+        - "9000"
       environment:
         - MINIO_ACCESS_KEY=access
         - MINIO_SECRET_KEY=secretkey
@@ -192,8 +190,8 @@ services:
         - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       volumes:
         - ${DATA_SAVE_PATH}/mysql:/var/lib/mysql
-      ports:
-        - "${MYSQL_PORT}:3306"
+      expose:
+        - "3306"
       networks:
         - backend
 
@@ -209,8 +207,8 @@ services:
         - MYSQL_ROOT_PASSWORD=${PERCONA_ROOT_PASSWORD}
       volumes:
         - percona:/var/lib/mysql
-      ports:
-        - "${PERCONA_PORT}:3306"
+      expose:
+        - "3306"
       networks:
         - backend
 
@@ -225,8 +223,8 @@ services:
         - ACCEPT_EULA=Y
       volumes:
         - ${DATA_SAVE_PATH}/mssql:/var/opt/mssql
-      ports:
-        - "${MSSQL_PORT}:1433"
+      expose:
+        - "1433"
       networks:
         - backend
 
@@ -236,8 +234,8 @@ services:
       build: ./mariadb
       volumes:
         - ${DATA_SAVE_PATH}/mariadb:/var/lib/mysql
-      ports:
-        - "${MARIADB_PORT}:3306"
+      expose:
+        - "3306"
       environment:
         - MYSQL_DATABASE=${MARIADB_DATABASE}
         - MYSQL_USER=${MARIADB_USER}
@@ -252,8 +250,8 @@ services:
       build: ./postgres
       volumes:
         - ${DATA_SAVE_PATH}/postgres:/var/lib/postgresql/data
-      ports:
-        - "${POSTGRES_PORT}:5432"
+      expose:
+        - "5432"
       environment:
         - POSTGRES_DB=${POSTGRES_DB}
         - POSTGRES_USER=${POSTGRES_USER}
@@ -267,8 +265,8 @@ services:
       build: ./postgres-postgis
       volumes:
         - ${DATA_SAVE_PATH}/postgres:/var/lib/postgresql/data
-      ports:
-        - "${POSTGRES_PORT}:5432"
+      expose:
+        - "5432"
       environment:
         - POSTGRES_DB=${POSTGRES_DB}
         - POSTGRES_USER=${POSTGRES_USER}
@@ -280,9 +278,9 @@ services:
 
     neo4j:
       build: ./neo4j
-      ports:
-        - "7474:7474"
-        - "1337:1337"
+      expose:
+        - "7474"
+        - "1337"
       environment:
         - NEO4J_AUTH=default:secret
       volumes:
@@ -294,8 +292,8 @@ services:
 
     mongo:
       build: ./mongo
-      ports:
-        - "27017:27017"
+      expose:
+        - "27017"
       volumes:
         - ${DATA_SAVE_PATH}/mongo:/data/db
       networks:
@@ -305,8 +303,8 @@ services:
 
     rethinkdb:
       build: ./rethinkdb
-      ports:
-        - "8090:8080"
+      expose:
+        - "8090"
       volumes:
         - ${DATA_SAVE_PATH}/rethinkdb:/data/rethinkdb_data
       networks:
@@ -318,8 +316,8 @@ services:
       build: ./redis
       volumes:
         - ${DATA_SAVE_PATH}/redis:/data
-      ports:
-        - "6379:6379"
+      expose:
+        - "6379"
       networks:
         - backend
 
@@ -331,11 +329,11 @@ services:
         - workspace
       volumes:
         - ${DATA_SAVE_PATH}/aerospike:/opt/aerospike/data
-      ports:
-        - "3000:3000"
-        - "3001:3001"
-        - "3002:3002"
-        - "3003:3003"
+      expose:
+        - "3000"
+        - "3001"
+        - "3002"
+        - "3003"
       networks:
         - backend
 
@@ -345,8 +343,8 @@ services:
       build: ./memcached
       volumes:
         - ${DATA_SAVE_PATH}/memcached:/var/lib/memcached
-      ports:
-        - "${MEMCACHED_HOST_PORT}:11211"
+      expose:
+        - "11211"
       depends_on:
         - php-fpm
       networks:
@@ -356,8 +354,8 @@ services:
 
     beanstalkd:
       build: ./beanstalkd
-      ports:
-        - "${BEANSTALKD_HOST_PORT}:11300"
+      expose:
+        - "11300"
       privileged: true
       depends_on:
         - php-fpm
@@ -368,10 +366,10 @@ services:
 
     rabbitmq:
       build: ./rabbitmq
-      ports:
-        - "${RABBITMQ_NODE_HOST_PORT}:5672"
-        - "${RABBITMQ_MANAGEMENT_HTTP_HOST_PORT}:15672"
-        - "${RABBITMQ_MANAGEMENT_HTTPS_HOST_PORT}:15671"
+      expose:
+        - "5672"
+        - "15672"
+        - "15671"
       privileged: true
       environment:
         - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
@@ -385,8 +383,8 @@ services:
 
     beanstalkd-console:
       build: ./beanstalkd-console
-      ports:
-        - "2080:2080"
+      expose:
+        - "2080"
       depends_on:
         - beanstalkd
       networks:
@@ -396,10 +394,10 @@ services:
 
     caddy:
       build: ./caddy
-      ports:
-        - "80:80"
-        - "443:443"
-        - "2015:2015"
+      expose:
+        - "80"
+        - "443"
+        - "2015"
       volumes_from:
         - applications
       volumes:
@@ -421,8 +419,8 @@ services:
         - MYSQL_USER=${PMA_USER}
         - MYSQL_PASSWORD=${PMA_PASSWORD}
         - MYSQL_ROOT_PASSWORD=${PMA_ROOT_PASSWORD}
-      ports:
-        - "${PMA_PORT}:80"
+      expose:
+        - "80"
       depends_on:
         - "${PMA_DB_ENGINE}"
       networks:
@@ -433,8 +431,8 @@ services:
 
     adminer:
       build: ./adminer
-      ports:
-        - "${ADM_PORT}:8080"
+      expose:
+        - "8080"
       depends_on:
         - php-fpm
       networks:
@@ -445,8 +443,8 @@ services:
 
     pgadmin:
       build: ./pgadmin
-      ports:
-        - "5050:5050"
+      expose:
+        - "5050"
       depends_on:
         - postgres
       networks:
@@ -460,9 +458,9 @@ services:
       volumes:
         - elasticsearch-data:/usr/share/elasticsearch/data
         - elasticsearch-plugins:/usr/share/elasticsearch/plugins
-      ports:
-        - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
-        - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
+      expose:
+        - "9200"
+        - "9300"
       depends_on:
         - php-fpm
       networks:
@@ -487,9 +485,9 @@ services:
 
     mailhog:
       build: ./mailhog
-      ports:
-        - "1025:1025"
-        - "8025:8025"
+      expose:
+        - "1025"
+        - "8025"
       networks:
         - frontend
 
@@ -497,8 +495,8 @@ services:
 
     selenium:
       build: ./selenium
-      ports:
-        - "${SELENIUM_PORT}:4444"
+      expose:
+        - "4444"
       volumes:
         - /dev/shm:/dev/shm
       networks:
@@ -546,8 +544,8 @@ services:
 
     balancer:
       build: ./haproxy
-      ports:
-        - "${HAPROXY_HOST_HTTP_PORT}:8085"
+      expose:
+        - "8085"
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
       links:
@@ -559,9 +557,9 @@ services:
       build: ./jenkins
       environment:
         JAVA_OPTS: "-Djava.awt.headless=true"
-      ports:
-        - "${JENKINS_HOST_SLAVE_AGENT_PORT}:50000"
-        - "${JENKINS_HOST_HTTP_PORT}:8080"
+      expose:
+        - "50000"
+        - "8080"
       privileged: true
       volumes:
         - ${JENKINS_HOME}:/var/jenkins_home
